@@ -1,0 +1,175 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "no96bucknet.ipynb",
+      "private_outputs": true,
+      "provenance": [],
+      "collapsed_sections": [],
+      "mount_file_id": "19L4hKwzNGYmyMQJhUuoQJ6u4Rvpk96J1",
+      "authorship_tag": "ABX9TyMaaEmPIDKm5kPsg4M68tQs",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    },
+    "accelerator": "GPU"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/BUNO96/BUNO96/blob/main/BUNO96.h5\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "67GaBh4L52T1"
+      },
+      "source": [
+        "import pandas as pd\n",
+        "import tensorflow as tf\n",
+        "from tensorflow import keras"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "9G6BxNCD--Mt"
+      },
+      "source": [
+        "from google.colab import drive\n",
+        "drive.mount(\"/content/drive\")"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "CUGbkEk2T10l"
+      },
+      "source": [
+        "# Import the ANN model file 'BUNO96.h5'.\n",
+        "\n",
+        "filename = '/content/drive/BUNO96.h5'\n",
+        "\n",
+        "loaded_model = tf.keras.models.load_model(filename)"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "H3V06uHx9-gS"
+      },
+      "source": [
+        "column_names = ['CASE','CCS','DSF','Member','Temp','Risetime',\n",
+        "                'Load Area', 'BC']\n",
+        "\n",
+        "# Read the input file.\n",
+        "filename2 = '/content/drive/input.xlsx'\n",
+        "raw_dataset = pd.read_excel(filename2 , names=column_names)\n",
+        "\n",
+        "dataset = raw_dataset.copy()\n",
+        " \n",
+        "# one-hot encording\n",
+        "ccs = dataset.pop('CCS')\n",
+        "dsf = dataset.pop('DSF')\n",
+        "member = dataset.pop('Member')\n",
+        "temp = dataset.pop('Temp')\n",
+        "loadarea = dataset.pop('Load Area')\n",
+        "bc = dataset.pop('BC')\n",
+        "dataset['1S3S'] = (ccs == '1S3S')\n",
+        "dataset['2S4S'] = (ccs == '2S4S')\n",
+        "dataset['DNVGL'] = (dsf == 'DNVGL')\n",
+        "dataset['DONGA'] = (dsf == 'DONGA')\n",
+        "dataset['Pri BHD'] = (member == 'Pri BHD')\n",
+        "dataset['Sec BHD'] = (member == 'Sec BHD')\n",
+        "dataset['RT'] = (temp == 'RT')\n",
+        "dataset['OT'] = (temp == 'OT')\n",
+        "dataset['A'] = (loadarea == 'A')\n",
+        "dataset['E'] = (loadarea == 'E')\n",
+        "dataset['F'] = (loadarea == 'F')\n",
+        "dataset['G'] = (loadarea == 'G')\n",
+        "dataset['J'] = (loadarea == 'J')\n",
+        "dataset['L'] = (loadarea == 'L')\n",
+        "dataset['O'] = (loadarea == 'O')\n",
+        "dataset['Q'] = (loadarea == 'Q')\n",
+        "dataset['T'] = (loadarea == 'T')\n",
+        "dataset['M'] = (loadarea == 'M')\n",
+        "dataset['R'] = (loadarea == 'R')\n",
+        "dataset['X'] = (loadarea == 'X')\n",
+        "dataset['RIGID'] = (bc == 'RIGID')\n",
+        "dataset['CASE1'] = (bc == 'CASE1')\n",
+        "dataset['CASE2'] = (bc == 'CASE2')\n",
+        "dataset['CASE3'] = (bc == 'CASE3')\n",
+        "dataset['CASE4'] = (bc == 'CASE4')\n",
+        "dataset['CASE5'] = (bc == 'CASE5')\n",
+        "dataset['CASE6'] = (bc == 'CASE6')\n"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "JZAquBhv-InZ"
+      },
+      "source": [
+        "_# For normalization of data\n",
+        "\n",
+        "train_stats = dataset.describe()\n",
+        "train_stats = train_stats.transpose()\n",
+        "\n",
+        "def norm(x):\n",
+        "\n",
+        "  return (x - train_stats['mean']) / train_stats['std']\n",
+        "\n",
+        "normed_test_data = norm(dataset)\n",
+        "\n",
+        " \n",
+        "# Prediction\n",
+        "\n",
+        "all_pre= loaded_model.predict(normed_test_data).flatten()\n"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "GvHf_34T-HS5"
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "Vfco6wLi-BXK"
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
