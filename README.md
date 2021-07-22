@@ -1,2 +1,3 @@
 # BUNO96
-study
+Machine leanrning based prediction of ultimate buckling strength of NO96ㄱ
+read me
